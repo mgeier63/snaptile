@@ -1,13 +1,23 @@
 from gi.repository import Gdk
 
-def position(startpos, endpos):
+def position(startpos, endpos, scrn):
     window, screen = active_window()
     window.unmaximize()
     window.set_shadow_width(0, 0, 0, 0)
-    workarea = screen.get_monitor_workarea(screen.get_monitor_at_window(window))
+    workarea = screen.get_monitor_workarea(scrn)
 
     offx, offy = offsets(window)
-    w, h = (workarea.width / 4, workarea.height / 3)
+    w, h = (workarea.width / 4, workarea.height / 4)
+
+    print("startpos ",startpos[0],"/",startpos[1])
+    print("endtpos ",endpos[0],"/",endpos[1])
+
+    if (startpos[0]==-1):
+        startpos=(1,1)
+        endpos=(3,2)
+
+    print("startpos ",startpos[0],"/",startpos[1])
+    print("endtpos ",endpos[0],"/",endpos[1])
 
     pos = (
         min(startpos[0], endpos[0]),
@@ -19,11 +29,16 @@ def position(startpos, endpos):
     )
 
 
-    multiscreen_offset = get_multi_screen_offset(screen, window)
+    moffx = 0
+    moffy = 1080
+    if (scrn==1):
+        moffx = 1920
+        moffy = 0
 
+    print("move ",pos[1] * w + moffx,"/",pos[0] * h + moffy)
     window.move_resize(
-        pos[1] * w + multiscreen_offset,
-        pos[0] * h,
+        pos[1] * w + moffx,
+        pos[0] * h + moffy,
         w * dims[1] - (offx * 2),
         h * dims[0]- (offx + offy)
     )
@@ -37,10 +52,6 @@ def active_window():
 
     return (window, screen)
 
-def get_multi_screen_offset(screen,window):
-    monitor = screen.get_monitor_at_window(window)
-    monitor_geometry = screen.get_monitor_geometry(monitor)
-    return monitor_geometry.x
 
 def offsets(window):
     origin = window.get_origin()
